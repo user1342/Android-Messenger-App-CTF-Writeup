@@ -1,4 +1,4 @@
-# Android Messenger CTF
+# Android Messenger CTF Writeup
 A CTF challenge created for Android by [Mason CC](https://competitivecyber.club/).
 - [GitHub](https://github.com/tlamb96/kgb_messenger) repo with resources and challenges
 - [CTF writeup](https://medium.com/bugbountywriteup/android-ctf-kgb-messenger-d9069f4cedf8) by [Harshit Maheshwari](https://twitter.com/fake_batman_).
