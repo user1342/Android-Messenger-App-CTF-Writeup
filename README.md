@@ -17,7 +17,7 @@ A CTF challenge created for Android by [Mason CC](https://competitivecyber.club/
 
 There is an integrity / tamper-detection check when the application is first run. This primarily utilizes two lines of Java in the ```onCreate``` method in the ```MainActivity``` class.
 
-```
+```java
 String property = System.getProperty("user.home");
 String str = System.getenv("USER");
 if (property == null || property.isEmpty() || !property.equals("Russia")) {
@@ -30,7 +30,7 @@ if (property == null || property.isEmpty() || !property.equals("Russia")) {
 }
 ```
 
-This code checks two system properties and if the expected value is not returned the application throws an error message and stops. The first of these values that it compares is with the string ```Russia``` the second is with a string in the ```strings.xml``` res file with the key ```User``` and value ```RkxBR3s1N0VSTDFOR180UkNIM1J9Cg==```. Using PowerShell (Or any other tool) we can unencode this Base64 encoded string.
+This code checks two system properties and if the expected value is not returned the application throws an error message and exits. The first of these values that it compares is with the string ```Russia``` the second is with a string in the ```strings.xml``` res file with the key ```User``` and value ```RkxBR3s1N0VSTDFOR180UkNIM1J9Cg==```. Using PowerShell (Or any other tool) we can decode this Base64 encoded string.
 
 ```shell
 [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("RkxBR3s1N0VSTDFOR180UkNIM1J9Cg=="))
@@ -38,15 +38,15 @@ This code checks two system properties and if the expected value is not returned
 
 This returns the first flag, however, we still need to get past this check to continue to the rest of the application.
 
-One approach for this is to simply remove this code from the application. To do this we're going to use APKtool.
+One approach for this is to simply remove this code from the application. To do this we're going to use APKtool and patch the Smali.
 
 ```shell
 apktool d kgb-messenger.apk
 ```
 
-After opening the folder this has created you can use the ```AndroidManifest.xml``` file to find the entrypoint of the application. We know this to be ```MainActivity```. Traverse the SMALI to find this class and inside of it go to it's onCreate method. Inside of this method is the aformentioned code block. As we don't want to use this code block we're simply going to remove the condition and replace it with the code that was inside of the condition we wanted to run.
+After opening the folder this has created you can use the ```AndroidManifest.xml``` file to find the entrypoint of the application. We know this to be ```MainActivity```. Traverse the SMALI to find this class and inside of it go to it's onCreate method. Inside of this method is the aformentioned code block. As we don't want to use this code block we're simply going to remove the condition and replace it with the code that was inside of the branch of the condition that we wanted to run.
 
-```
+```smali
 .method protected onCreate(Landroid/os/Bundle;)V
     .locals 3
 
@@ -66,7 +66,7 @@ After opening the folder this has created you can use the ```AndroidManifest.xml
 .end method
 ```
 
-After we've done this we're going to need to go back to the directory with the starting apk in and run the below which will reassemble our SMALI.
+After we've done this we're going to need to go back to the directory with the starting apk in and run the below which will re-assemble our SMALI to a dalvik executable and APK.
 
 ```shell
 apktool b kgb-messenger
@@ -201,7 +201,7 @@ private String a(String str) {
 ```
 If we take the hardcoded value (```"V@]EAASB\u0012WZF\u0012e,a$7(&am2(3.\u0003";```) that the previous method's output is compared against and enter it into a function that does an inverse of the previous method we should be able to get the required string.
 
-If you make a quick Android application and Log the output of the below method when the above string is entered into it you'll be returned another string which should be entered into the message dialogue (```Boris, give me the password```).
+If you make a quick Android application and Log the output of the below method when the above string is entered into it you'll be returned another string (```Boris, give me the password```) which should be entered into the messenger application message diologue.
 
 ```java
 private String a(String str) {
